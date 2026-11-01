@@ -1,0 +1,87 @@
+/* styles.css — Custom styling for Solar XAI System */
+
+@layer utilities {
+  .bg-grid-card {
+    background-color: #111a2e;
+  }
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #090e17;
+}
+::-webkit-scrollbar-thumb {
+  background: #1f2e4d;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #334b79;
+}
+
+/* Preset pills */
+.preset-pill {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  background-color: #0b1322;
+  border: 1px solid #1f2e4d;
+  color: #cbd5e1;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.preset-pill:hover {
+  background-color: #1e293b;
+  border-color: #f59e0b;
+  color: #fbbf24;
+  transform: translateY(-1px);
+}
+.preset-pill.active {
+  background-color: #f59e0b;
+  border-color: #f59e0b;
+  color: #020617;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);
+}
+
+/* Navigation tabs */
+.nav-tab.active-tab {
+  background-color: #f59e0b;
+  color: #020617;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+}
+
+/* Range input styling */
+input[type="range"]::-webkit-slider-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.25);
+}
+
+/* Animations */
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 28px rgba(239, 68, 68, 0.8);
+  }
+}
+
+.critical-ramp-glow {
+  animation: pulseGlow 1.8s infinite ease-in-out;
+}

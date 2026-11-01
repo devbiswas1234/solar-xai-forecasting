@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Solar XAI Forecasting & Grid Intelligence System</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            solar: {
+              50: '#fffbeb',
+              100: '#fef3c7',
+              400: '#fbbf24',
+              500: '#f59e0b',
+              600: '#d97706',
+            },
+            grid: {
+              dark: '#0B1120',
+              card: '#131D31',
+              border: '#1F2E4D',
+              accent: '#38BDF8',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Custom Styling -->
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body class="bg-[#090E17] text-slate-100 min-h-screen flex flex-col font-sans selection:bg-amber-500 selection:text-black">
+
+  <!-- TOP HEADER / NAV -->
+  <header class="border-b border-grid-border bg-[#0B1322]/90 backdrop-blur-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Brand & Title -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-yellow-300 flex items-center justify-center shadow-lg shadow-amber-500/20 text-slate-950 font-black">
+          <i data-lucide="sun" class="w-6 h-6 stroke-[2.5]"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-extrabold text-lg tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-amber-400 via-yellow-200 to-sky-300">
+              SOLAR-XAI
+            </span>
+            <span class="text-xs px-2 py-0.5 rounded-full font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+              Champion: XGBoost (R² 0.8687)
+            </span>
+          </div>
+          <p class="text-[11px] text-slate-400 font-medium">Explainable Solar Forecasting & Grid Ramp Management</p>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="hidden md:flex items-center gap-1 bg-slate-900/80 p-1 rounded-xl border border-grid-border">
+        <button onclick="switchTab('studio')" id="tab-btn-studio" class="nav-tab active-tab flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all">
+          <i data-lucide="zap" class="w-4 h-4"></i> Forecasting Studio
+        </button>
+        <button onclick="switchTab('xai')" id="tab-btn-xai" class="nav-tab flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition-all">
+          <i data-lucide="microscope" class="w-4 h-4"></i> Explainable AI (SHAP)
+        </button>
+        <button onclick="switchTab('benchmarks')" id="tab-btn-benchmarks" class="nav-tab flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition-all">
+          <i data-lucide="trophy" class="w-4 h-4"></i> Model Benchmarks
+        </button>
+        <button onclick="switchTab('ramp')" id="tab-btn-ramp" class="nav-tab flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition-all">
+          <i data-lucide="alert-triangle" class="w-4 h-4"></i> PV Ramp Alerts
+        </button>
+        <button onclick="switchTab('replay')" id="tab-btn-replay" class="nav-tab flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition-all">
+          <i data-lucide="history" class="w-4 h-4"></i> Historical Replay
+        </button>
+      </nav>
+
+      <!-- System Status Pills -->
+      <div class="flex items-center gap-2 text-xs">
+        <div class="hidden lg:flex items-center gap-1.5 bg-slate-900 px-2.5 py-1 rounded-lg border border-grid-border text-slate-300">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>FastAPI Live</span>
+        </div>
+        <a href="/docs" target="_blank" class="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 px-2.5 py-1 rounded-lg border border-slate-700 text-slate-200 text-xs font-medium transition-colors">
+          <i data-lucide="file-code" class="w-3.5 h-3.5"></i> Swagger Docs
+        </a>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- MAIN VIEWPORT CONTAINER -->
+  <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- ===================================================================== -->
+    <!-- TAB 1: FORECASTING STUDIO & LIVE SIMULATOR -->
+    <!-- ===================================================================== -->
+    <section id="view-studio" class="tab-view space-y-6">
+      
+      <!-- Operational Preset Chips -->
+      <div class="bg-grid-card border border-grid-border rounded-2xl p-4 shadow-xl">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-400">
+            <i data-lucide="sparkles" class="w-4 h-4"></i> Quick Operational Presets:
+          </div>
+          <div class="flex flex-wrap gap-2" id="preset-container">
+            <!-- Loaded dynamically from API -->
+            <button class="preset-pill animate-pulse">Loading presets...</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grid Layout: Simulator Controls (Left) & Predictions/XAI (Right) -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        <!-- LEFT: Meteorological & Technical Inputs (5 cols) -->
+        <div class="lg:col-span-5 space-y-5">
+          <div class="bg-grid-card border border-grid-border rounded-2xl p-5 shadow-xl space-y-5">
+            
+            <div class="flex items-center justify-between border-b border-grid-border/80 pb-3">
+              <div class="flex items-center gap-2">
+                <i data-lucide="sliders" class="w-5 h-5 text-amber-400"></i>
+                <h2 class="text-base font-bold text-white">Meteorological Inputs</h2>
+              </div>
+              <button onclick="resetToOptimal()" class="text-xs text-slate-400 hover:text-amber-400 flex items-center gap-1 transition-colors">
+                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Reset
+              </button>
+            </div>
+
+            <!-- Parameter Inputs Form -->
+            <form id="forecast-form" onsubmit="event.preventDefault(); triggerForecast();" class="space-y-4 text-xs">
+              
+              <!-- 1. Solar Irradiance (Pyranometer) -->
+              <div class="space-y-1.5 bg-slate-900/60 p-3 rounded-xl border border-grid-border">
+                <div class="flex justify-between items-center">
+                  <label class="font-semibold text-slate-200 flex items-center gap-1.5">
+                    <i data-lucide="sun-medium" class="w-4 h-4 text-amber-400"></i> Solar Irradiance (Pyranometer)
+                  </label>
+                  <span class="font-mono text-amber-400 font-bold" id="val-pyranometer">1015 W/m²</span>
+                </div>
+                <input type="range" id="input-pyranometer" min="0" max="1300" step="10" value="1015"
+                       class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-400">
+                <div class="flex justify-between text-[10px] text-slate-500">
+                  <span>0 (Night)</span>
+                  <span>600 (Moderate)</span>
+                  <span>1300 (Extreme Sol)</span>
+                </div>
+              </div>
+
+              <!-- 2. Dual Temperatures (Module & Ambient) -->
+              <div class="grid grid-cols-2 gap-3">
+                
+                <!-- Panel Module Temp -->
+                <div class="space-y-1.5 bg-slate-900/60 p-3 rounded-xl border border-grid-border">
+                  <div class="flex justify-between items-center">
+                    <label class="font-semibold text-slate-200">Panel Temp</label>
+                    <span class="font-mono text-sky-400 font-bold" id="val-temp1">46.5 °C</span>
+                  </div>
+                  <input type="range" id="input-temp1" min="10" max="80" step="0.5" value="46.5"
+                         class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-sky-400">
+                </div>
+
+                <!-- Ambient Air Temp -->
+                <div class="space-y-1.5 bg-slate-900/60 p-3 rounded-xl border border-grid-border">
+                  <div class="flex justify-between items-center">
+                    <label class="font-semibold text-slate-200">Air Temp</label>
+                    <span class="font-mono text-emerald-400 font-bold" id="val-air-temp">32.0 °C</span>
+                  </div>
+                  <input type="range" id="input-air-temp" min="5" max="50" step="0.5" value="32.0"
+                         class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-400">
+                </div>
+
+              </div>
+
+              <!-- Computed Thermal Differential Indicator -->
+              <div class="flex items-center justify-between px-3 py-2 bg-slate-900/40 rounded-lg border border-slate-800/80 text-[11px]">
+                <span class="text-slate-400">Thermal Differential (Temp_Diff = Temp1 - Air):</span>
+                <span id="badge-temp-diff" class="font-mono font-bold text-amber-300">+14.5 °C</span>
+              </div>
+
+              <!-- 3. Atmospheric Humidity & Wind Speed -->
+              <div class="grid grid-cols-2 gap-3">
+                <div class="space-y-1.5 bg-slate-900/60 p-3 rounded-xl border border-grid-border">
+                  <div class="flex justify-between items-center">
+                    <label class="font-semibold text-slate-200">Rel. Humidity</label>
+                    <span class="font-mono text-blue-400 font-bold" id="val-humidity">22 %</span>
+                  </div>
+                  <input type="range" id="input-humidity" min="0" max="100" step="1" value="22"
+                         class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-400">
+                </div>
+
+                <div class="space-y-1.5 bg-slate-900/60 p-3 rounded-xl border border-grid-border">
+                  <div class="flex justify-between items-center">
+                    <label class="font-semibold text-slate-200">Wind Speed</label>
+                    <span class="font-mono text-teal-400 font-bold" id="val-wind-speed">2.4 m/s</span>
+                  </div>
+                  <input type="range" id="input-wind-speed" min="0" max="25" step="0.2" value="2.4"
+                         class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-teal-400">
+                </div>
+              </div>
+
+              <!-- 4. Diurnal Time & Season -->
+              <div class="grid grid-cols-2 gap-3">
+                <div class="space-y-1.5 bg-slate-900/60 p-3 rounded-xl border border-grid-border">
+                  <div class="flex justify-between items-center">
+                    <label class="font-semibold text-slate-200">Hour of Day</label>
+                    <span class="font-mono text-amber-300 font-bold" id="val-hour">12:30 PM</span>
+                  </div>
+                  <input type="range" id="input-hour" min="5" max="20" step="0.25" value="12.5"
+                         class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-300">
+                </div>
+
+                <div class="space-y-1.5 bg-slate-900/60 p-3 rounded-xl border border-grid-border">
+                  <div class="flex justify-between items-center">
+                    <label class="font-semibold text-slate-200">Season / Month</label>
+                    <span class="font-mono text-amber-300 font-bold" id="val-month">June (M=6)</span>
+                  </div>
+                  <input type="range" id="input-month" min="1" max="12" step="1" value="6"
+                         class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-300">
+                </div>
+              </div>
+
+              <!-- 5. Advanced Lags & Soiling Section (Collapsible) -->
+              <div class="border border-slate-800 rounded-xl overflow-hidden bg-slate-900/40">
+                <button type="button" onclick="toggleAdvancedLags()" class="w-full p-2.5 flex items-center justify-between text-left font-semibold text-slate-300 hover:text-white">
+                  <span class="flex items-center gap-1.5">
+                    <i data-lucide="git-commit" class="w-4 h-4 text-amber-400"></i> Autoregressive Lags & Soiling Proxy
+                  </span>
+                  <i data-lucide="chevron-down" id="advanced-chevron" class="w-4 h-4 transition-transform"></i>
+                </button>
+
+                <div id="advanced-lags-body" class="p-3 space-y-3 border-t border-slate-800/80 hidden">
+                  
+                  <div class="space-y-1">
+                    <div class="flex justify-between">
+                      <label class="text-slate-400">Power Output (t-1)</label>
+                      <span class="font-mono text-slate-200 font-bold" id="val-lag1-power">14.8 W</span>
+                    </div>
+                    <input type="range" id="input-lag1-power" min="0" max="22" step="0.1" value="14.8"
+                           class="w-full h-1 bg-slate-800 rounded appearance-none cursor-pointer accent-slate-300">
+                  </div>
+
+                  <div class="space-y-1">
+                    <div class="flex justify-between">
+                      <label class="text-slate-400">Pyranometer Irradiance (t-1)</label>
+                      <span class="font-mono text-slate-200 font-bold" id="val-lag1-pyr">990 W/m²</span>
+                    </div>
+                    <input type="range" id="input-lag1-pyr" min="0" max="1300" step="10" value="990"
+                           class="w-full h-1 bg-slate-800 rounded appearance-none cursor-pointer accent-slate-300">
+                  </div>
+
+                  <div class="space-y-1">
+                    <div class="flex justify-between">
+                      <label class="text-slate-400">Panel Soiling Factor (Degradation)</label>
+                      <span class="font-mono text-amber-300 font-bold" id="val-soiling">0.0088</span>
+                    </div>
+                    <input type="range" id="input-soiling" min="0.0020" max="0.0150" step="0.0002" value="0.0088"
+                           class="w-full h-1 bg-slate-800 rounded appearance-none cursor-pointer accent-amber-400">
+                    <p class="text-[10px] text-slate-500">Normal clean baseline: ~0.0085. Heavy dust accumulation: &lt;0.0050.</p>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- Action Button -->
+              <button type="submit" class="w-full py-3 px-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black rounded-xl shadow-lg shadow-amber-500/25 flex items-center justify-center gap-2 transition-all transform active:scale-[0.99]">
+                <i data-lucide="zap" class="w-4 h-4 fill-slate-950"></i> Run Forecast & XAI Explanation
+              </button>
+
+            </form>
+
+          </div>
+        </div>
+
+        <!-- RIGHT: Prediction Hero, Multi-Model, Ramp Alert & Live SHAP Waterfall (7 cols) -->
+        <div class="lg:col-span-7 space-y-5">
+          
+          <!-- Primary Prediction Card -->
+          <div class="bg-gradient-to-br from-grid-card to-[#0B1526] border border-grid-border rounded-2xl p-6 shadow-2xl relative overflow-hidden">
+            <div class="absolute -right-8 -top-8 w-44 h-44 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-grid-border/80 pb-5">
+              <div>
+                <span class="text-xs font-bold text-amber-400 uppercase tracking-widest flex items-center gap-1.5">
+                  <i data-lucide="activity" class="w-4 h-4"></i> Solar Power Output Forecast (P_t)
+                </span>
+                <div class="flex items-baseline gap-3 mt-1">
+                  <span id="hero-forecast-watts" class="text-5xl font-black font-mono text-white tracking-tight">14.12</span>
+                  <span class="text-2xl font-bold text-amber-400">Watts</span>
+                </div>
+                <p class="text-xs text-slate-400 mt-1">
+                  Produced by <strong class="text-white" id="hero-model-name">XGBoost (Champion Model)</strong>
+                </p>
+              </div>
+
+              <!-- Ramp Status Badge -->
+              <div id="ramp-alert-box" class="p-4 rounded-xl border flex flex-col justify-center min-w-[240px] bg-slate-900/80 border-emerald-500/30 text-emerald-300">
+                <div class="flex items-center justify-between">
+                  <span class="text-[11px] uppercase font-bold tracking-wider" id="ramp-alert-title">Ramp Status: Normal</span>
+                  <span id="ramp-alert-delta" class="font-mono text-xs font-bold">-0.68 W</span>
+                </div>
+                <p class="text-[11px] text-slate-300 mt-1 leading-snug" id="ramp-alert-desc">
+                  Stable power output. Fluctuations well within standard 3.98 W threshold.
+                </p>
+              </div>
+            </div>
+
+            <!-- Multi-Model Comparison Pills -->
+            <div class="pt-4 grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+              
+              <div class="bg-slate-900/60 p-2.5 rounded-xl border border-amber-500/40">
+                <div class="text-[10px] text-amber-400 font-bold uppercase">XGBoost (Best)</div>
+                <div class="text-lg font-mono font-black text-white" id="cmp-xgboost">14.12 W</div>
+                <div class="text-[9px] text-slate-400">R² = 0.8687</div>
+              </div>
+
+              <div class="bg-slate-900/60 p-2.5 rounded-xl border border-grid-border">
+                <div class="text-[10px] text-emerald-400 font-bold uppercase">Random Forest</div>
+                <div class="text-lg font-mono font-black text-white" id="cmp-rf">14.05 W</div>
+                <div class="text-[9px] text-slate-400">R² = 0.8683</div>
+              </div>
+
+              <div class="bg-slate-900/60 p-2.5 rounded-xl border border-grid-border">
+                <div class="text-[10px] text-sky-400 font-bold uppercase">Linear Reg.</div>
+                <div class="text-lg font-mono font-black text-white" id="cmp-lr">13.82 W</div>
+                <div class="text-[9px] text-slate-400">R² = 0.8016</div>
+              </div>
+
+              <div class="bg-slate-900/60 p-2.5 rounded-xl border border-grid-border">
+                <div class="text-[10px] text-purple-400 font-bold uppercase">PyTorch LSTM</div>
+                <div class="text-lg font-mono font-black text-white" id="cmp-lstm">13.65 W</div>
+                <div class="text-[9px] text-slate-400">R² = 0.7056</div>
+              </div>
+
+            </div>
+
+          </div>
+
+          <!-- Real-Time Local SHAP Waterfall Breakdown -->
+          <div class="bg-grid-card border border-grid-border rounded-2xl p-5 shadow-xl space-y-4">
+            
+            <div class="flex items-center justify-between border-b border-grid-border/80 pb-3">
+              <div>
+                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                  <i data-lucide="git-pull-request" class="w-4 h-4 text-amber-400"></i> Local SHAP Attribution Waterfall
+                </h3>
+                <p class="text-xs text-slate-400">How each meteorological feature shifts the forecast from expected baseline (E[f(x)] = 6.55 W)</p>
+              </div>
+              <span class="text-xs px-2.5 py-1 rounded-lg bg-slate-900 font-mono text-slate-300 border border-grid-border">
+                TreeExplainer Live
+              </span>
+            </div>
+
+            <!-- Waterfall Canvas Chart -->
+            <div class="h-64 w-full relative">
+              <canvas id="shap-waterfall-chart"></canvas>
+            </div>
+
+            <!-- Top Drivers Pill Matrix -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 text-xs">
+              <div class="bg-emerald-950/20 border border-emerald-500/20 p-3 rounded-xl space-y-1">
+                <div class="font-bold text-emerald-400 flex items-center gap-1.5">
+                  <i data-lucide="trending-up" class="w-3.5 h-3.5"></i> Top Positive Boosters (Pushed Up)
+                </div>
+                <ul id="shap-top-pos-list" class="space-y-1 text-slate-300 font-mono text-[11px]">
+                  <li>Loading SHAP values...</li>
+                </ul>
+              </div>
+
+              <div class="bg-rose-950/20 border border-rose-500/20 p-3 rounded-xl space-y-1">
+                <div class="font-bold text-rose-400 flex items-center gap-1.5">
+                  <i data-lucide="trending-down" class="w-3.5 h-3.5"></i> Top Negative Inhibitors (Pulled Down)
+                </div>
+                <ul id="shap-top-neg-list" class="space-y-1 text-slate-300 font-mono text-[11px]">
+                  <li>Loading SHAP values...</li>
+                </ul>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================================== -->
+    <!-- TAB 2: EXPLAINABLE AI (XAI) HUB -->
+    <!-- ===================================================================== -->
+    <section id="view-xai" class="tab-view hidden space-y-6">
+      
+      <div class="bg-grid-card border border-grid-border rounded-2xl p-6 shadow-xl space-y-6">
+        
+        <div class="border-b border-grid-border/80 pb-4">
+          <h2 class="text-xl font-bold text-white flex items-center gap-2">
+            <i data-lucide="microscope" class="w-6 h-6 text-amber-400"></i> Explainable AI (XAI) & Feature Mechanics
+          </h2>
+          <p class="text-sm text-slate-400 mt-1">
+            Validating the physical relationship between irradiance, autoregression, panel thermal differential, and degradation through Tree-SHAP.
+          </p>
+        </div>
+
+        <!-- Global SHAP Importance Chart & Physics Description -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          
+          <div class="lg:col-span-7 bg-slate-900/60 p-5 rounded-2xl border border-grid-border space-y-4">
+            <h3 class="font-bold text-sm text-white flex items-center gap-2">
+              <i data-lucide="bar-chart-2" class="w-4 h-4 text-amber-400"></i> Global Feature Importance (Mean |SHAP| on Test Set)
+            </h3>
+            <div class="h-80 w-full relative">
+              <canvas id="shap-global-bar-chart"></canvas>
+            </div>
+          </div>
+
+          <div class="lg:col-span-5 space-y-4 text-xs leading-relaxed">
+            
+            <div class="bg-slate-900/60 p-4 rounded-xl border border-grid-border space-y-2">
+              <h4 class="font-bold text-amber-400 flex items-center gap-1.5">
+                <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i> 1. Irradiance & Autoregressive Dominance
+              </h4>
+              <p class="text-slate-300">
+                <code class="text-amber-300 font-mono">Power_Output_lag1</code> and <code class="text-amber-300 font-mono">Pyranometer</code> account for over <strong>70% of total model explanatory power</strong>. Solar generation follows physical optical conversion directly while autoregressive lags preserve inertia during clear-sky transitions.
+              </p>
+            </div>
+
+            <div class="bg-slate-900/60 p-4 rounded-xl border border-grid-border space-y-2">
+              <h4 class="font-bold text-sky-400 flex items-center gap-1.5">
+                <i data-lucide="thermometer" class="w-4 h-4 text-sky-400"></i> 2. Thermal Differential (Temp_Diff)
+              </h4>
+              <p class="text-slate-300">
+                Engineered feature <code class="text-sky-300 font-mono">Temp1 - Air Temp</code> reflects semiconductor bandgap narrowing and thermal resistive losses. When panel module temperatures surge far above ambient, SHAP values penalize the forecast proportionally.
+              </p>
+            </div>
+
+            <div class="bg-slate-900/60 p-4 rounded-xl border border-grid-border space-y-2">
+              <h4 class="font-bold text-purple-400 flex items-center gap-1.5">
+                <i data-lucide="shield-alert" class="w-4 h-4 text-purple-400"></i> 3. Leakage Prevention Architecture
+              </h4>
+              <p class="text-slate-300">
+                To guarantee true research validity, <code class="text-rose-300 font-mono">Voltage (V)</code> and <code class="text-rose-300 font-mono">Current (A)</code> were strictly excluded during preprocessing, eliminating the trivial <code class="font-mono">P = V × I</code> leakage trap.
+              </p>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- Research Plots Gallery -->
+        <div class="pt-4 border-t border-grid-border/80 space-y-4">
+          <h3 class="font-bold text-base text-white flex items-center gap-2">
+            <i data-lucide="image" class="w-5 h-5 text-amber-400"></i> High-Resolution Research Visualizations
+          </h3>
+          
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            
+            <div class="bg-slate-900/70 border border-grid-border rounded-xl p-3 space-y-2 group cursor-pointer" onclick="openArtifactModal('/research-artifacts/shap_beeswarm_summary.png', 'SHAP Beeswarm Summary Plot')">
+              <div class="aspect-video bg-slate-950 rounded-lg overflow-hidden border border-slate-800">
+                <img src="/research-artifacts/shap_beeswarm_summary.png" alt="SHAP Beeswarm" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+              </div>
+              <div class="font-bold text-xs text-slate-200">SHAP Beeswarm Summary</div>
+              <p class="text-[11px] text-slate-400">Shows distribution of feature impacts across all 961 test samples.</p>
+            </div>
+
+            <div class="bg-slate-900/70 border border-grid-border rounded-xl p-3 space-y-2 group cursor-pointer" onclick="openArtifactModal('/research-artifacts/shap_local_ramp_waterfall.png', 'Worst Negative Ramp Event Waterfall')">
+              <div class="aspect-video bg-slate-950 rounded-lg overflow-hidden border border-slate-800">
+                <img src="/research-artifacts/shap_local_ramp_waterfall.png" alt="Ramp Waterfall" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+              </div>
+              <div class="font-bold text-xs text-slate-200">Largest Negative Ramp Waterfall</div>
+              <p class="text-[11px] text-slate-400">Explaining the single largest cloud transient drop in the test set.</p>
+            </div>
+
+            <div class="bg-slate-900/70 border border-grid-border rounded-xl p-3 space-y-2 group cursor-pointer" onclick="openArtifactModal('/research-artifacts/model_predictions_comparison.png', 'Multi-Model Predictions Window')">
+              <div class="aspect-video bg-slate-950 rounded-lg overflow-hidden border border-slate-800">
+                <img src="/research-artifacts/model_predictions_comparison.png" alt="Model Comparison" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+              </div>
+              <div class="font-bold text-xs text-slate-200">150-Point Test Window Overlay</div>
+              <p class="text-[11px] text-slate-400">Actual power output plotted against all 4 models simultaneously.</p>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================================== -->
+    <!-- TAB 3: MODEL BENCHMARKS & LEADERBOARD -->
+    <!-- ===================================================================== -->
+    <section id="view-benchmarks" class="tab-view hidden space-y-6">
+      
+      <div class="bg-grid-card border border-grid-border rounded-2xl p-6 shadow-xl space-y-6">
+        
+        <div class="border-b border-grid-border/80 pb-4">
+          <h2 class="text-xl font-bold text-white flex items-center gap-2">
+            <i data-lucide="trophy" class="w-6 h-6 text-amber-400"></i> Model Performance Leaderboard & Evaluation
+          </h2>
+          <p class="text-sm text-slate-400 mt-1">
+            Evaluated on held-out test data using Monthly-Block Chronological Splitting (70% Train, 15% Val, 15% Test).
+          </p>
+        </div>
+
+        <!-- Leaderboard Table -->
+        <div class="overflow-x-auto rounded-xl border border-grid-border">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-900/90 text-[11px] text-slate-400 uppercase tracking-wider border-b border-grid-border">
+              <tr>
+                <th class="py-3 px-4">Rank / Model</th>
+                <th class="py-3 px-4">R² Score</th>
+                <th class="py-3 px-4">MAE (Watts)</th>
+                <th class="py-3 px-4">RMSE (Watts)</th>
+                <th class="py-3 px-4">MAPE (%)</th>
+                <th class="py-3 px-4">Architecture</th>
+                <th class="py-3 px-4">Status</th>
+              </tr>
+            </thead>
+            <tbody id="metrics-table-body" class="divide-y divide-grid-border/60 font-mono">
+              <!-- Rendered via JS -->
+              <tr><td colspan="7" class="py-4 text-center">Loading benchmark data...</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Comparative Charts -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+          
+          <div class="bg-slate-900/60 p-4 rounded-xl border border-grid-border">
+            <h3 class="text-xs font-bold text-white uppercase tracking-wider mb-3">Model Accuracy Comparison (R²)</h3>
+            <div class="h-64 relative">
+              <canvas id="r2-bar-chart"></canvas>
+            </div>
+          </div>
+
+          <div class="bg-slate-900/60 p-4 rounded-xl border border-grid-border">
+            <h3 class="text-xs font-bold text-white uppercase tracking-wider mb-3">Forecasting Error (MAE in Watts)</h3>
+            <div class="h-64 relative">
+              <canvas id="mae-bar-chart"></canvas>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================================== -->
+    <!-- TAB 4: PV RAMP & GRID MANAGEMENT DASHBOARD -->
+    <!-- ===================================================================== -->
+    <section id="view-ramp" class="tab-view hidden space-y-6">
+      
+      <div class="bg-grid-card border border-grid-border rounded-2xl p-6 shadow-xl space-y-6">
+        
+        <div class="border-b border-grid-border/80 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+              <i data-lucide="alert-triangle" class="w-6 h-6 text-amber-400"></i> PV Ramp Event Detection & Grid Management
+            </h2>
+            <p class="text-sm text-slate-400 mt-1">
+              Anticipating abrupt generation fluctuations to safeguard grid frequency and schedule spinning reserves.
+            </p>
+          </div>
+          <div class="flex items-center gap-2 bg-slate-900 p-2.5 rounded-xl border border-grid-border">
+            <span class="text-xs text-slate-400">Critical Ramp Threshold (90th percentile):</span>
+            <span class="text-sm font-mono font-bold text-amber-400">3.98 Watts</span>
+          </div>
+        </div>
+
+        <!-- Key Ramp Metrics Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 text-center">
+          
+          <div class="bg-slate-900/60 p-4 rounded-xl border border-grid-border">
+            <div class="text-[11px] text-slate-400 font-bold uppercase">Critical Events in Test</div>
+            <div class="text-3xl font-mono font-black text-rose-400 mt-1">96</div>
+            <div class="text-[10px] text-slate-500 mt-0.5">out of 960 test steps</div>
+          </div>
+
+          <div class="bg-slate-900/60 p-4 rounded-xl border border-grid-border">
+            <div class="text-[11px] text-slate-400 font-bold uppercase">Detection Precision</div>
+            <div class="text-3xl font-mono font-black text-emerald-400 mt-1">71.0%</div>
+            <div class="text-[10px] text-slate-500 mt-0.5">low false positive rate</div>
+          </div>
+
+          <div class="bg-slate-900/60 p-4 rounded-xl border border-grid-border">
+            <div class="text-[11px] text-slate-400 font-bold uppercase">Detection Recall</div>
+            <div class="text-3xl font-mono font-black text-sky-400 mt-1">51.0%</div>
+            <div class="text-[10px] text-slate-500 mt-0.5">catches severe dropouts</div>
+          </div>
+
+          <div class="bg-slate-900/60 p-4 rounded-xl border border-grid-border">
+            <div class="text-[11px] text-slate-400 font-bold uppercase">Overall F1-Score</div>
+            <div class="text-3xl font-mono font-black text-purple-400 mt-1">0.594</div>
+            <div class="text-[10px] text-slate-500 mt-0.5">XGBoost best detector</div>
+          </div>
+
+        </div>
+
+        <!-- Operator Action Protocols -->
+        <div class="bg-slate-900/40 p-4 rounded-xl border border-slate-800 space-y-3 text-xs">
+          <h3 class="font-bold text-white text-sm flex items-center gap-2">
+            <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i> Standard Operating Protocols (SOP) for Grid Operators
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-rose-950/20 border border-rose-500/20 p-3 rounded-lg space-y-1">
+              <span class="font-bold text-rose-400">Ramp-Down Alarm (ΔP &le; -3.98 W):</span>
+              <p class="text-slate-300 text-[11px]">
+                Indicates sudden irradiance obstruction from cloud passage. Automatically signals BESS (Battery Energy Storage) to discharge instantaneously and triggers fast-start spinning reserves to avert grid under-frequency trip.
+              </p>
+            </div>
+            <div class="bg-amber-950/20 border border-amber-500/20 p-3 rounded-lg space-y-1">
+              <span class="font-bold text-amber-400">Ramp-Up Alarm (ΔP &ge; +3.98 W):</span>
+              <p class="text-slate-300 text-[11px]">
+                Indicates immediate cloud departure with solar surge. Dispatches inverter ramp-rate controls to smooth interconnection slope and routes surplus energy to storage charging.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Critical Ramp Events Table -->
+        <div class="space-y-3">
+          <h3 class="font-bold text-sm text-white">Recent Historical Ramp Events Log</h3>
+          <div class="overflow-x-auto rounded-xl border border-grid-border max-h-72 overflow-y-auto">
+            <table class="w-full text-left text-xs text-slate-300">
+              <thead class="bg-slate-900 text-[11px] text-slate-400 uppercase sticky top-0">
+                <tr>
+                  <th class="py-2.5 px-3">Step Index</th>
+                  <th class="py-2.5 px-3">Power (t-1)</th>
+                  <th class="py-2.5 px-3">Power (t)</th>
+                  <th class="py-2.5 px-3">Ramp Delta</th>
+                  <th class="py-2.5 px-3">Actual Event</th>
+                  <th class="py-2.5 px-3">Predicted By XGBoost</th>
+                </tr>
+              </thead>
+              <tbody id="ramp-events-table-body" class="divide-y divide-grid-border/60 font-mono">
+                <!-- Populated via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================================== -->
+    <!-- TAB 5: HISTORICAL TEST REPLAY & BATCH TOOL -->
+    <!-- ===================================================================== -->
+    <section id="view-replay" class="tab-view hidden space-y-6">
+      
+      <div class="bg-grid-card border border-grid-border rounded-2xl p-6 shadow-xl space-y-6">
+        
+        <div class="border-b border-grid-border/80 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+              <i data-lucide="history" class="w-6 h-6 text-amber-400"></i> Historical Test Set Scrubbing & Replay
+            </h2>
+            <p class="text-sm text-slate-400 mt-1">
+              Select any point on the 150-step test window to inspect actual vs predicted power and load it into the simulator.
+            </p>
+          </div>
+          <button onclick="loadTestPointToSimulator()" id="btn-load-point" class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 transition-all">
+            <i data-lucide="external-link" class="w-4 h-4"></i> Load Selected Step into Simulator
+          </button>
+        </div>
+
+        <!-- 150-Point Interactive Time-Series Chart -->
+        <div class="bg-slate-900/60 p-4 rounded-xl border border-grid-border space-y-3">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-bold text-slate-300">Time-Series Forecast Curves (150-Point Test Window)</span>
+            <span class="text-slate-400" id="selected-point-indicator">Click point on chart to select</span>
+          </div>
+          <div class="h-80 w-full relative">
+            <canvas id="historical-replay-chart"></canvas>
+          </div>
+        </div>
+
+        <!-- Batch CSV Ingestion Drawer -->
+        <div class="bg-slate-900/40 p-5 rounded-xl border border-slate-800 space-y-3">
+          <h3 class="text-sm font-bold text-white flex items-center gap-2">
+            <i data-lucide="upload" class="w-4 h-4 text-amber-400"></i> Batch CSV Inference Tool
+          </h3>
+          <p class="text-xs text-slate-400">
+            Upload any CSV file matching the dataset features to generate batch forecasts and detect critical PV ramps.
+          </p>
+          <div class="flex items-center gap-3">
+            <input type="file" id="batch-file-input" accept=".csv" class="text-xs text-slate-300 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-slate-800 file:text-amber-400 hover:file:bg-slate-700 cursor-pointer">
+            <button onclick="uploadBatchCSV()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl border border-slate-700 transition-colors">
+              Process CSV
+            </button>
+          </div>
+          <div id="batch-results-preview" class="hidden text-xs font-mono text-emerald-400 bg-slate-950 p-3 rounded-lg border border-slate-800">
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-grid-border/60 bg-[#0B1322] py-4 text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+      <p>Research Pipeline: <em>Enhancing Solar Energy Forecasting Using Explainable AI (XAI)</em></p>
+      <p class="text-slate-400 font-medium">Powered by FastAPI, XGBoost, Scikit-learn, PyTorch & SHAP</p>
+    </div>
+  </footer>
+
+  <!-- ARTIFACT MODAL VIEWER -->
+  <div id="artifact-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-grid-card border border-grid-border rounded-2xl max-w-4xl w-full p-5 space-y-4 shadow-2xl relative">
+      <div class="flex items-center justify-between border-b border-grid-border pb-3">
+        <h3 id="modal-title" class="font-bold text-base text-white">Visualization</h3>
+        <button onclick="closeArtifactModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div class="max-h-[75vh] overflow-auto rounded-lg bg-slate-950 p-2 flex items-center justify-center">
+        <img id="modal-img" src="" alt="Artifact" class="max-w-full h-auto rounded">
+      </div>
+    </div>
+  </div>
+
+  <!-- Application Script -->
+  <script src="/static/app.js"></script>
+</body>
+</html>
