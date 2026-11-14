@@ -85,6 +85,10 @@ def main():
         "results/y_val.csv",
         "results/X_test.csv",
         "results/y_test.csv",
+        "results/test_predictions_xgboost_lstm.csv",
+        "results/xgboost_shap_values_test.csv",
+        "results/xgboost_shap_values_test.npy",
+        "results/shap_metadata.json",
         # Serialized models
         "models/linear_regression_final.pkl",
         "models/random_forest_final.pkl",

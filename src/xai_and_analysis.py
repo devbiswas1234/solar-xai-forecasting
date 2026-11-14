@@ -43,6 +43,33 @@ def global_shap_analysis(xgb_model, X_test, feature_cols, results_dir="results")
     plt.close("all")
     print(f"[XAI] Global bar saved -> {path_bar}")
 
+    # ── Save SHAP values and metadata for downstream explanation-stability ───
+    import json
+    shap_df = pd.DataFrame(shap_values, columns=feature_cols)
+    shap_csv_path = os.path.join(results_dir, "xgboost_shap_values_test.csv")
+    shap_df.to_csv(shap_csv_path, index=False)
+    shap_npy_path = os.path.join(results_dir, "xgboost_shap_values_test.npy")
+    np.save(shap_npy_path, shap_values)
+
+    expected_val = explainer.expected_value
+    if isinstance(expected_val, np.ndarray):
+        expected_val = float(expected_val[0])
+    else:
+        expected_val = float(expected_val)
+
+    meta = {
+        "model": "XGBoost",
+        "base_value_E_fx": expected_val,
+        "n_samples": int(shap_values.shape[0]),
+        "n_features": int(shap_values.shape[1]),
+        "feature_names": feature_cols,
+        "lstm_sequence_length": 6,
+        "note": "LSTM sequence length is 6, so LSTM predictions align to test indices 6 through 960 (first 6 rows are NaN)."
+    }
+    with open(os.path.join(results_dir, "shap_metadata.json"), "w") as f:
+        json.dump(meta, f, indent=2)
+    print(f"[XAI] SHAP values saved -> {shap_csv_path} and {shap_npy_path}")
+
     # Compute mean |SHAP| ranking for the summary report
     mean_abs_shap = np.abs(shap_values).mean(axis=0)
     importance_df = pd.DataFrame({

@@ -237,6 +237,22 @@ def train_and_evaluate(prep: dict, results_dir: str = "results",
     predictions["LSTM"] = lstm_pred_full
     print(f"   R2 = {metrics_rows[-1]['R2']:.4f}")
 
+    # ── Save predictions tables (for downstream analysis / explanation-stability) ──
+    lstm_full = np.full(len(y_test), np.nan)
+    lstm_full[SEQ_LEN:] = lstm_pred_full
+
+    preds_export_df = pd.DataFrame({
+        "Test_Index": np.arange(len(y_test)),
+        "Actual_Power_W": y_test.values,
+        "XGBoost_Pred_W": np.round(np.clip(xgb_pred, 0, None), 4),
+        "LSTM_Pred_W": np.round(np.clip(lstm_full, 0, None), 4),
+        "Random_Forest_Pred_W": np.round(np.clip(rf_pred, 0, None), 4),
+        "Linear_Regression_Pred_W": np.round(np.clip(lr_pred, 0, None), 4),
+    })
+    preds_export_path = os.path.join(results_dir, "test_predictions_xgboost_lstm.csv")
+    preds_export_df.to_csv(preds_export_path, index=False)
+    print(f"[train] Predictions saved -> {preds_export_path}")
+
     # ── Save metrics table ──────────────────────────────────────────────────
     metrics_df = pd.DataFrame(metrics_rows)
     metrics_path = os.path.join(results_dir, "final_model_metrics.csv")

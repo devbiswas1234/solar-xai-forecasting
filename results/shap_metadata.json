@@ -1,0 +1,29 @@
+{
+  "model": "XGBoost",
+  "base_value_E_fx": 6.551793098449707,
+  "n_samples": 961,
+  "n_features": 19,
+  "feature_names": [
+    "Pyranometer (Watt/m2)",
+    "Wind Direction (Degree)",
+    "Relative Humidity (%)",
+    "Temp1 (degC)",
+    "Temp2 (degC)",
+    "Wind Speed (m/s)",
+    "Air Temp (degC)",
+    "Hour",
+    "Hour_sin",
+    "Hour_cos",
+    "Month_sin",
+    "Month_cos",
+    "Temp_Diff",
+    "Pyranometer_lag1",
+    "Power_Output_lag1",
+    "Pyranometer_lag2",
+    "Power_Output_lag2",
+    "Rolling_Soiling_Factor",
+    "Expected_Baseline_Power"
+  ],
+  "lstm_sequence_length": 6,
+  "note": "LSTM sequence length is 6, so LSTM predictions align to test indices 6 through 960 (first 6 rows are NaN)."
+}
