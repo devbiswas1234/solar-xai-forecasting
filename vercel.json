@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "cleanUrls": true,
+  "outputDirectory": "app/frontend",
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://solar-xai-backend.onrender.com/api/:path*"
+    },
+    {
+      "source": "/research-artifacts/:path*",
+      "destination": "https://solar-xai-backend.onrender.com/research-artifacts/:path*"
+    }
+  ]
+}

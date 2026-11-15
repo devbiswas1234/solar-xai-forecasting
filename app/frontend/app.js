@@ -5,6 +5,7 @@
 // Application State
 const state = {
   activeTab: 'studio',
+  apiBaseUrl: localStorage.getItem('solar_xai_api_url') || '',
   presets: [],
   currentFeatures: {},
   debounceTimer: null,
@@ -18,6 +19,14 @@ const state = {
   testSeries: [],
   selectedTestPoint: null,
 };
+
+function getApiUrl(path) {
+  let base = (state.apiBaseUrl || '').trim();
+  if (base.endsWith('/')) {
+    base = base.slice(0, -1);
+  }
+  return base ? `${base}${path}` : path;
+}
 
 // Top 10 global importance ranking from research results
 const GLOBAL_SHAP_IMPORTANCE = [
@@ -39,6 +48,7 @@ const GLOBAL_SHAP_IMPORTANCE = [
 document.addEventListener('DOMContentLoaded', async () => {
   if (window.lucide) lucide.createIcons();
 
+  checkBackendHealth();
   setupInputListeners();
   await loadPresets();
   await loadBenchmarks();
@@ -174,7 +184,7 @@ function debouncedForecast() {
 // ─────────────────────────────────────────────────────────────────────────────
 async function loadPresets() {
   try {
-    const res = await fetch('/api/presets');
+    const res = await fetch(getApiUrl('/api/presets'));
     const data = await res.json();
     state.presets = data.presets || [];
 
@@ -273,7 +283,7 @@ async function triggerForecast() {
 
   try {
     // 1. Run multi-model forecast
-    const predRes = await fetch('/api/predict', {
+    const predRes = await fetch(getApiUrl('/api/predict'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ features, model_name: 'xgboost' }),
@@ -281,7 +291,7 @@ async function triggerForecast() {
     const predData = await predRes.json();
 
     // 2. Run SHAP local explanation
-    const explainRes = await fetch('/api/explain', {
+    const explainRes = await fetch(getApiUrl('/api/explain'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ features }),
@@ -504,7 +514,7 @@ function initGlobalSHAPChart() {
 // ─────────────────────────────────────────────────────────────────────────────
 async function loadBenchmarks() {
   try {
-    const res = await fetch('/api/metrics');
+    const res = await fetch(getApiUrl('/api/metrics'));
     const data = await res.json();
     const metrics = data.metrics || [];
 
@@ -609,7 +619,7 @@ function renderBenchmarkCharts(metrics) {
 // ─────────────────────────────────────────────────────────────────────────────
 async function loadRampEvents() {
   try {
-    const res = await fetch('/api/ramp-report?limit=40');
+    const res = await fetch(getApiUrl('/api/ramp-report?limit=40'));
     const data = await res.json();
     const records = data.sample_records || [];
 
@@ -652,7 +662,7 @@ async function loadRampEvents() {
 // ─────────────────────────────────────────────────────────────────────────────
 async function loadHistoricalReplay() {
   try {
-    const res = await fetch('/api/test-sequence?limit=150');
+    const res = await fetch(getApiUrl('/api/test-sequence?limit=150'));
     const data = await res.json();
     state.testSeries = data.series || [];
 
@@ -812,7 +822,7 @@ async function uploadBatchCSV() {
   }
 
   try {
-    const res = await fetch('/api/upload-csv', {
+    const res = await fetch(getApiUrl('/api/upload-csv'), {
       method: 'POST',
       body: formData,
     });
@@ -842,7 +852,7 @@ function openArtifactModal(imgSrc, title) {
   const modalImg = document.getElementById('modal-img');
   const modalTitle = document.getElementById('modal-title');
   if (modal && modalImg && modalTitle) {
-    modalImg.src = imgSrc;
+    modalImg.src = getApiUrl(imgSrc);
     modalTitle.textContent = title;
     modal.classList.remove('hidden');
   }
@@ -851,4 +861,102 @@ function openArtifactModal(imgSrc, title) {
 function closeArtifactModal() {
   const modal = document.getElementById('artifact-modal');
   if (modal) modal.classList.add('hidden');
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BACKEND API & HEALTH MONITOR (VERCEL <-> RENDER)
+// ─────────────────────────────────────────────────────────────────────────────
+async function checkBackendHealth() {
+  const dot = document.getElementById('backend-status-dot');
+  const text = document.getElementById('backend-status-text');
+  const swaggerLink = document.getElementById('swagger-docs-link');
+
+  if (swaggerLink) {
+    swaggerLink.href = getApiUrl('/docs');
+  }
+
+  // Update research plot preview thumbnails if an external backend is connected
+  document.querySelectorAll('img[src^="/research-artifacts/"]').forEach(img => {
+    const rawPath = img.getAttribute('data-raw-src') || img.getAttribute('src');
+    img.setAttribute('data-raw-src', rawPath);
+    img.src = getApiUrl(rawPath);
+  });
+
+  try {
+    const res = await fetch(getApiUrl('/api/status'), { signal: AbortSignal.timeout(4000) });
+    if (res.ok) {
+      if (dot) dot.className = 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse';
+      if (text) text.textContent = state.apiBaseUrl ? 'Render: Online' : 'Backend: Online';
+    } else {
+      if (dot) dot.className = 'w-2 h-2 rounded-full bg-amber-400';
+      if (text) text.textContent = 'Backend: HTTP ' + res.status;
+    }
+  } catch (err) {
+    if (dot) dot.className = 'w-2 h-2 rounded-full bg-rose-500';
+    if (text) text.textContent = 'Backend: Offline';
+  }
+}
+
+function openApiConfigModal() {
+  const modal = document.getElementById('api-config-modal');
+  const input = document.getElementById('api-url-input');
+  const disp = document.getElementById('current-api-display');
+  if (input) input.value = state.apiBaseUrl;
+  if (disp) disp.textContent = state.apiBaseUrl ? state.apiBaseUrl : 'Relative (/api) [Local / Proxy]';
+  if (modal) modal.classList.remove('hidden');
+}
+
+function closeApiConfigModal() {
+  const modal = document.getElementById('api-config-modal');
+  if (modal) modal.classList.add('hidden');
+}
+
+async function testAndSaveApiUrl() {
+  const input = document.getElementById('api-url-input');
+  const statusDisp = document.getElementById('api-test-status');
+  const rawVal = input ? input.value.trim() : '';
+  const cleanUrl = rawVal.replace(/\/+$/, '');
+
+  if (statusDisp) statusDisp.innerHTML = '<span>Testing connection to backend...</span>';
+
+  const testUrl = cleanUrl ? `${cleanUrl}/api/status` : '/api/status';
+  try {
+    const res = await fetch(testUrl, { signal: AbortSignal.timeout(6000) });
+    if (res.ok) {
+      state.apiBaseUrl = cleanUrl;
+      if (cleanUrl) {
+        localStorage.setItem('solar_xai_api_url', cleanUrl);
+      } else {
+        localStorage.removeItem('solar_xai_api_url');
+      }
+      if (statusDisp) {
+        statusDisp.innerHTML = '<span class="text-emerald-400 font-bold">✓ Connected successfully! Saved.</span>';
+      }
+      checkBackendHealth();
+      setTimeout(async () => {
+        closeApiConfigModal();
+        await loadPresets();
+        await loadBenchmarks();
+        await loadRampEvents();
+        await loadHistoricalReplay();
+        triggerForecast();
+      }, 700);
+    } else {
+      if (statusDisp) {
+        statusDisp.innerHTML = `<span class="text-rose-400 font-bold">✗ Backend returned status ${res.status}</span>`;
+      }
+    }
+  } catch (err) {
+    if (statusDisp) {
+      statusDisp.innerHTML = `<span class="text-rose-400 font-bold">✗ Failed to reach backend: ${err.message}</span>`;
+    }
+  }
+}
+
+function resetApiUrl() {
+  localStorage.removeItem('solar_xai_api_url');
+  state.apiBaseUrl = '';
+  const input = document.getElementById('api-url-input');
+  if (input) input.value = '';
+  testAndSaveApiUrl();
 }

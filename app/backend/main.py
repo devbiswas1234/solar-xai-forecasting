@@ -60,7 +60,11 @@ if os.path.exists(FRONTEND_DIR):
     app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
 
 
-# ── Root & Static UI ────────────────────────────────────────────────────────
+# ── Root & Health Check ───────────────────────────────────────────────────
+@app.get("/healthz", include_in_schema=False)
+def health_check():
+    return {"status": "ok", "service": "solar-xai-backend"}
+
 @app.get("/", include_in_schema=False)
 def serve_index():
     index_path = os.path.join(FRONTEND_DIR, "index.html")

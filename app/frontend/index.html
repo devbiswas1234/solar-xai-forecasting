@@ -83,13 +83,14 @@
         </button>
       </nav>
 
-      <!-- System Status Pills -->
+      <!-- System Status & Backend Config Pills -->
       <div class="flex items-center gap-2 text-xs">
-        <div class="hidden lg:flex items-center gap-1.5 bg-slate-900 px-2.5 py-1 rounded-lg border border-grid-border text-slate-300">
-          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span>FastAPI Live</span>
-        </div>
-        <a href="/docs" target="_blank" class="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 px-2.5 py-1 rounded-lg border border-slate-700 text-slate-200 text-xs font-medium transition-colors">
+        <button onclick="openApiConfigModal()" id="backend-status-pill" class="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 px-2.5 py-1 rounded-lg border border-grid-border text-slate-300 transition-colors cursor-pointer" title="Click to view or change backend API URL">
+          <span id="backend-status-dot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="backend-status-text">Backend: Online</span>
+          <i data-lucide="settings" class="w-3.5 h-3.5 text-slate-400 ml-0.5"></i>
+        </button>
+        <a id="swagger-docs-link" href="/docs" target="_blank" class="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 px-2.5 py-1 rounded-lg border border-slate-700 text-slate-200 text-xs font-medium transition-colors">
           <i data-lucide="file-code" class="w-3.5 h-3.5"></i> Swagger Docs
         </a>
       </div>
@@ -718,6 +719,43 @@
       <p class="text-slate-400 font-medium">Powered by FastAPI, XGBoost, Scikit-learn, PyTorch & SHAP</p>
     </div>
   </footer>
+
+  <!-- BACKEND API CONFIG MODAL (FOR VERCEL -> RENDER) -->
+  <div id="api-config-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-grid-card border border-grid-border rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl relative">
+      <div class="flex items-center justify-between border-b border-grid-border pb-3">
+        <h3 class="font-bold text-base text-white flex items-center gap-2">
+          <i data-lucide="server" class="w-5 h-5 text-amber-400"></i> Backend API Connection
+        </h3>
+        <button onclick="closeApiConfigModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div class="space-y-3 text-xs">
+        <p class="text-slate-300">
+          When hosted on <strong>Vercel</strong>, this frontend communicates with your <strong>Render</strong> FastAPI backend.
+        </p>
+        <div class="space-y-1.5">
+          <label class="font-semibold text-slate-200">Render Backend URL:</label>
+          <input type="text" id="api-url-input" placeholder="e.g. https://solar-xai-backend.onrender.com"
+                 class="w-full bg-slate-900 border border-grid-border rounded-xl p-2.5 text-xs text-amber-300 font-mono focus:outline-none focus:border-amber-400">
+          <p class="text-[10px] text-slate-500">Leave blank to use relative local paths (<code class="text-slate-400 font-mono">/api</code>) or Vercel rewrites.</p>
+        </div>
+        <div id="api-test-status" class="text-[11px] p-2.5 rounded-lg bg-slate-900/80 border border-slate-800 text-slate-300 flex items-center justify-between">
+          <span>Active target:</span>
+          <span id="current-api-display" class="font-mono text-amber-400 font-bold">Relative (/api)</span>
+        </div>
+        <div class="flex items-center justify-end gap-2 pt-2">
+          <button type="button" onclick="resetApiUrl()" class="px-3 py-1.5 rounded-lg border border-slate-700 text-slate-300 hover:bg-slate-800">
+            Reset to Default
+          </button>
+          <button type="button" onclick="testAndSaveApiUrl()" class="px-4 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold transition-all">
+            Test & Save
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- ARTIFACT MODAL VIEWER -->
   <div id="artifact-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
