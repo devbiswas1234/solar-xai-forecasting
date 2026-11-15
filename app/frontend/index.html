@@ -85,12 +85,14 @@
 
       <!-- System Status & Backend Config Pills -->
       <div class="flex items-center gap-2 text-xs">
-        <button onclick="openApiConfigModal()" id="backend-status-pill" class="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 px-2.5 py-1 rounded-lg border border-grid-border text-slate-300 transition-colors cursor-pointer" title="Click to view or change backend API URL">
-          <span id="backend-status-dot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span id="backend-status-text">Backend: Online</span>
-          <i data-lucide="settings" class="w-3.5 h-3.5 text-slate-400 ml-0.5"></i>
+        <button onclick="openApiConfigModal()" id="backend-status-pill" class="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 px-3 py-1.5 rounded-lg border border-grid-border text-slate-200 transition-colors cursor-pointer shadow-sm" title="Click to view or change backend API URL">
+          <span id="backend-status-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="backend-status-text" class="font-medium">Backend: Online</span>
+          <span class="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-slate-800 text-amber-400 border border-slate-700 flex items-center gap-1">
+            <i data-lucide="settings" class="w-3 h-3 text-amber-400"></i> API Settings
+          </span>
         </button>
-        <a id="swagger-docs-link" href="/docs" target="_blank" class="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 px-2.5 py-1 rounded-lg border border-slate-700 text-slate-200 text-xs font-medium transition-colors">
+        <a id="swagger-docs-link" href="https://solar-xai-backend.onrender.com/docs" target="_blank" class="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 px-2.5 py-1.5 rounded-lg border border-slate-700 text-slate-200 text-xs font-medium transition-colors">
           <i data-lucide="file-code" class="w-3.5 h-3.5"></i> Swagger Docs
         </a>
       </div>
