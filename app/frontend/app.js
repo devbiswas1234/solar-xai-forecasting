@@ -48,6 +48,12 @@ const GLOBAL_SHAP_IMPORTANCE = [
 document.addEventListener('DOMContentLoaded', async () => {
   if (window.lucide) lucide.createIcons();
 
+  if (window.Chart) {
+    Chart.defaults.font.family = '"IBM Plex Sans", -apple-system, BlinkMacSystemFont, sans-serif';
+    Chart.defaults.color = '#94A3B8';
+    Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.07)';
+  }
+
   checkBackendHealth();
   setupInputListeners();
   await loadPresets();

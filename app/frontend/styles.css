@@ -1,87 +1,320 @@
-/* styles.css — Custom styling for Solar XAI System */
+/*
+ * styles.css — Taste Skill 2.5 Enhanced Visual System
+ * Solar XAI Forecasting & Grid Intelligence System
+ * Caliber: x.ai / figma.com engineering grade
+ */
 
-@layer utilities {
-  .bg-grid-card {
-    background-color: #111a2e;
-  }
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+
+:root {
+  /* Motion tokens (Taste Skill 2.5) */
+  --m-in: 150ms;
+  --m-out: 120ms;
+  --m-press: 90ms;
+  --m-panel: 220ms;
+  --m-lift: -2px;
+  --m-ease: cubic-bezier(.2, .8, .2, 1);
+  --m-ease-enter: cubic-bezier(.16, 1, .3, 1);
+
+  /* Color system */
+  --bg-deep: #070B12;
+  --bg-surface: #0C1322;
+  --bg-card: #10192D;
+  --bg-card-hover: #142038;
+  --border-subtle: #18253E;
+  --border-active: #293E66;
+  --border-accent: rgba(56, 189, 248, 0.35);
+
+  --solar-amber: #F59E0B;
+  --solar-amber-bright: #FCD34D;
+  --grid-cyan: #38BDF8;
+  --grid-cyan-bright: #7DD3FC;
+  --status-emerald: #10B981;
+  --ramp-rose: #F43F5E;
+
+  --font-sans: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
-/* Custom scrollbars */
+/* Base typography & rendering */
+html {
+  font-family: var(--font-sans);
+  background-color: var(--bg-deep);
+  color: #F1F5F9;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Custom Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #090e17;
+  background: var(--bg-deep);
 }
 ::-webkit-scrollbar-thumb {
-  background: #1f2e4d;
-  border-radius: 4px;
+  background: #1E2D48;
+  border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #334b79;
+  background: #2E456E;
 }
 
-/* Preset pills */
-.preset-pill {
-  font-size: 11px;
+/* Hero Entrance Animation (Rule 5) */
+[data-enter] {
+  animation: heroEnter 650ms var(--m-ease-enter) forwards;
+}
+
+@keyframes heroEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Taste Cards (Rule 5: 2px lift, restrained hover, equal edges) */
+.taste-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  transition: transform var(--m-in) var(--m-ease),
+              border-color var(--m-in) var(--m-ease),
+              box-shadow var(--m-in) var(--m-ease);
+  position: relative;
+  overflow: clip;
+}
+
+.taste-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+  pointer-events: none;
+}
+
+.taste-card:hover {
+  transform: translateY(var(--m-lift));
+  border-color: var(--border-active);
+  box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.65), 0 0 0 1px var(--border-accent);
+}
+
+/* Tactile Buttons (Rule 5: step on hover, press on click) */
+.taste-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   font-weight: 600;
-  padding: 6px 12px;
+  border-radius: 10px;
+  transition: background-color var(--m-in) var(--m-ease),
+              color var(--m-in) var(--m-ease),
+              border-color var(--m-in) var(--m-ease),
+              box-shadow var(--m-in) var(--m-ease),
+              transform var(--m-press) var(--m-ease);
+  cursor: pointer;
+  user-select: none;
+}
+
+.taste-btn:hover {
+  transform: translateY(-1px);
+}
+
+.taste-btn:active {
+  transform: translateY(1px) scale(0.985);
+}
+
+.taste-btn-primary {
+  background: linear-gradient(135deg, #F59E0B, #D97706);
+  color: #05080E;
+  border: 1px solid #FCD34D;
+  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.28);
+}
+.taste-btn-primary:hover {
+  background: linear-gradient(135deg, #FBBF24, #F59E0B);
+  box-shadow: 0 4px 18px rgba(245, 158, 11, 0.42);
+}
+
+.taste-btn-secondary {
+  background-color: #121C30;
+  color: #E2E8F0;
+  border: 1px solid var(--border-subtle);
+}
+.taste-btn-secondary:hover {
+  background-color: #18253F;
+  border-color: var(--border-active);
+  color: #FFFFFF;
+}
+
+/* Preset Pills */
+.preset-pill {
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 6px 14px;
   border-radius: 9999px;
-  background-color: #0b1322;
-  border: 1px solid #1f2e4d;
-  color: #cbd5e1;
-  transition: all 0.2s ease-in-out;
+  background-color: #0E1627;
+  border: 1px solid var(--border-subtle);
+  color: #94A3B8;
+  transition: all var(--m-in) var(--m-ease);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  user-select: none;
 }
 .preset-pill:hover {
-  background-color: #1e293b;
-  border-color: #f59e0b;
-  color: #fbbf24;
+  background-color: #15223C;
+  border-color: var(--solar-amber);
+  color: #F8FAFC;
   transform: translateY(-1px);
 }
 .preset-pill.active {
-  background-color: #f59e0b;
-  border-color: #f59e0b;
-  color: #020617;
+  background: linear-gradient(135deg, #F59E0B, #D97706);
+  border-color: #FCD34D;
+  color: #05080E;
   font-weight: 700;
-  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);
+  transform: translateY(-1px);
 }
 
-/* Navigation tabs */
+/* Navigation Tabs */
+.nav-tab {
+  transition: all var(--m-in) var(--m-ease);
+  position: relative;
+  user-select: none;
+}
+.nav-tab:hover {
+  color: #F8FAFC;
+  background-color: rgba(255, 255, 255, 0.05);
+}
 .nav-tab.active-tab {
-  background-color: #f59e0b;
-  color: #020617;
+  background: linear-gradient(135deg, #F59E0B, #D97706);
+  color: #05080E;
   font-weight: 700;
-  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.35);
 }
 
-/* Range input styling */
+/* Precision Range Sliders */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  background: #141F36;
+  border-radius: 9999px;
+  outline: none;
+  transition: background 0.15s;
+}
 input[type="range"]::-webkit-slider-thumb {
-  width: 14px;
-  height: 14px;
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
-  border: 2px solid #ffffff;
-  cursor: pointer;
-  transition: transform 0.1s;
+  background: #FCD34D;
+  border: 2px solid #070B12;
+  box-shadow: 0 0 8px rgba(251, 191, 36, 0.6);
+  cursor: grab;
+  transition: transform var(--m-in) var(--m-ease), box-shadow var(--m-in) var(--m-ease);
 }
 input[type="range"]::-webkit-slider-thumb:hover {
-  transform: scale(1.25);
+  transform: scale(1.3);
+  box-shadow: 0 0 14px rgba(251, 191, 36, 0.9);
+}
+input[type="range"]:active::-webkit-slider-thumb {
+  cursor: grabbing;
+  transform: scale(1.2);
 }
 
-/* Animations */
-@keyframes pulseGlow {
+/* Real Photography Image Frames (Rule 5: 1.025x zoom on hover) */
+.taste-photo-frame {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid var(--border-subtle);
+  background-color: #0E1627;
+}
+.taste-photo-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 600ms cubic-bezier(.2, .8, .2, 1);
+}
+.taste-photo-frame:hover img {
+  transform: scale(1.025);
+}
+
+/* Architecture Diagram Signal Pulses (Rule 7) */
+@keyframes flowPulse {
+  0% {
+    stroke-dashoffset: 100;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+.dg-pulse-line {
+  stroke-dasharray: 6 6;
+  animation: flowPulse 2.4s linear infinite;
+}
+
+@keyframes beaconGlow {
   0%, 100% {
-    box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+    opacity: 0.4;
+    transform: scale(1);
   }
   50% {
-    box-shadow: 0 0 28px rgba(239, 68, 68, 0.8);
+    opacity: 0.9;
+    transform: scale(1.08);
+  }
+}
+
+.dg-beacon {
+  animation: beaconGlow 2s ease-in-out infinite;
+  transform-origin: center;
+}
+
+/* Critical Ramp Rate Glow */
+@keyframes criticalRampPulse {
+  0%, 100% {
+    box-shadow: 0 0 12px rgba(244, 63, 94, 0.35);
+    border-color: rgba(244, 63, 94, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 28px rgba(244, 63, 94, 0.85);
+    border-color: rgba(244, 63, 94, 1);
   }
 }
 
 .critical-ramp-glow {
-  animation: pulseGlow 1.8s infinite ease-in-out;
+  animation: criticalRampPulse 1.8s infinite ease-in-out;
+}
+
+/* Metrics Table Numbers */
+.tabular-data {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+/* Backdrop Blur Panels */
+.taste-glass {
+  background: rgba(12, 19, 34, 0.82);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
 }
