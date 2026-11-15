@@ -57,44 +57,46 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
       
       <!-- Brand & Telemetry Badge -->
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 via-amber-400 to-yellow-300 flex items-center justify-center shadow-lg shadow-amber-500/25 text-slate-950 font-black">
+      <div class="flex items-center gap-3 shrink-0">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 via-amber-400 to-yellow-300 flex items-center justify-center shadow-lg shadow-amber-500/25 text-slate-950 font-black shrink-0">
           <i data-lucide="sun" class="w-6 h-6 stroke-[2.4]"></i>
         </div>
-        <div>
+        <div class="flex flex-col justify-center">
           <div class="flex items-center gap-2">
-            <span class="font-extrabold text-lg tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-amber-400 via-yellow-200 to-sky-300">
+            <span class="font-extrabold text-lg tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-amber-400 via-yellow-200 to-sky-300 whitespace-nowrap leading-tight">
               SOLAR-XAI
             </span>
-            <span class="text-[11px] px-2 py-0.5 rounded-full font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-mono">
-              Champion: XGBoost (R² 0.8687)
+            <span class="hidden xl:inline-flex text-[10px] px-2 py-0.5 rounded-full font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-mono whitespace-nowrap">
+              XGBoost (R² 0.8687)
             </span>
           </div>
-          <p class="text-[11px] text-slate-400 font-medium">Sub-Hourly Solar Forecasting & Grid Ramp Management</p>
+          <p class="text-[11px] text-slate-400 font-medium whitespace-nowrap leading-none mt-1">
+            Solar Forecasting &amp; Grid Intelligence
+          </p>
         </div>
       </div>
 
       <!-- Navigation Tabs -->
-      <nav class="hidden lg:flex items-center gap-1 bg-[#0E1627] p-1 rounded-xl border border-[#18253E]">
-        <button onclick="switchTab('studio')" id="tab-btn-studio" class="nav-tab active-tab flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold">
+      <nav class="hidden lg:flex items-center gap-0.5 xl:gap-1 bg-[#0E1627] p-1 rounded-xl border border-[#18253E] shrink-0">
+        <button onclick="switchTab('studio')" id="tab-btn-studio" class="nav-tab active-tab flex items-center gap-1.5 xl:gap-2 px-2.5 xl:px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap">
           <i data-lucide="zap" class="w-3.5 h-3.5"></i> Forecasting Studio
         </button>
-        <button onclick="switchTab('xai')" id="tab-btn-xai" class="nav-tab flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-400">
+        <button onclick="switchTab('xai')" id="tab-btn-xai" class="nav-tab flex items-center gap-1.5 xl:gap-2 px-2.5 xl:px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-400 whitespace-nowrap">
           <i data-lucide="microscope" class="w-3.5 h-3.5"></i> Explainable AI (SHAP)
         </button>
-        <button onclick="switchTab('benchmarks')" id="tab-btn-benchmarks" class="nav-tab flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-400">
+        <button onclick="switchTab('benchmarks')" id="tab-btn-benchmarks" class="nav-tab flex items-center gap-1.5 xl:gap-2 px-2.5 xl:px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-400 whitespace-nowrap">
           <i data-lucide="trophy" class="w-3.5 h-3.5"></i> Model Benchmarks
         </button>
-        <button onclick="switchTab('ramp')" id="tab-btn-ramp" class="nav-tab flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-400">
+        <button onclick="switchTab('ramp')" id="tab-btn-ramp" class="nav-tab flex items-center gap-1.5 xl:gap-2 px-2.5 xl:px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-400 whitespace-nowrap">
           <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i> PV Ramp Alerts
         </button>
-        <button onclick="switchTab('replay')" id="tab-btn-replay" class="nav-tab flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-400">
+        <button onclick="switchTab('replay')" id="tab-btn-replay" class="nav-tab flex items-center gap-1.5 xl:gap-2 px-2.5 xl:px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-400 whitespace-nowrap">
           <i data-lucide="history" class="w-3.5 h-3.5"></i> Historical Replay
         </button>
       </nav>
 
       <!-- System Status & Backend Config Pill -->
-      <div class="flex items-center gap-2.5 text-xs">
+      <div class="flex items-center gap-2 text-xs shrink-0">
         <button onclick="openApiConfigModal()" id="backend-status-pill" class="taste-btn taste-btn-secondary px-3 py-1.5 text-slate-200" title="Click to inspect or change backend API connection">
           <span id="backend-status-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
           <span id="backend-status-text" class="font-medium">Backend: Online</span>
