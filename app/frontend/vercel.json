@@ -3,6 +3,10 @@
   "cleanUrls": true,
   "rewrites": [
     {
+      "source": "/static/:path*",
+      "destination": "/:path*"
+    },
+    {
       "source": "/api/:path*",
       "destination": "https://solar-xai-backend.onrender.com/api/:path*"
     },
